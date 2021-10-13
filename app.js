@@ -41,7 +41,7 @@ const getActualVotes = async () => {
         })
         buttons.forEach(button => {
           const teamType = button.dataset.team
-          button.innerHTML = `всого голосів: ${votesData[teamType] || 0}`
+          button.innerHTML = `Голосів: ${votesData[teamType] || 0}`
         })
       }
 
@@ -82,7 +82,7 @@ const onButtonClick = async (teamType) => {
 
     buttons.forEach(button => {
       const teamType = button.dataset.team
-      button.innerHTML = `${votesData[teamType] || 0} голосів`
+      button.innerHTML = `Голосів: ${votesData[teamType] || 0}`
     })
   } catch (e) {
     console.log(e)
