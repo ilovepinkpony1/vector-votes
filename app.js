@@ -18,13 +18,11 @@ const db = getDatabase(app);
 
 const buttons = document.querySelectorAll('.vectorButtonWrapper button')
 const buttonsWrappers = document.querySelectorAll('.vectorButtonWrapper')
-const isVoted = getCookie('user-vector-voted')
 const votesData = {}
 
 const getActualVotes = async () => {
   try {
     const snapshot = await get(ref(db, 'votes'))
-
     if (snapshot.exists()) {
       let allVotesCount = 0
 
@@ -35,19 +33,38 @@ const getActualVotes = async () => {
         }
       })
 
+      const isVoted = getCookie('user-vector-voted')
+
       if (isVoted) {
-        buttonsWrappers.forEach(wrapper => {
-          wrapper.classList.add('disabledButtonWrapper')
-        })
         buttons.forEach(button => {
           const teamType = button.dataset.team
           button.innerHTML = `Голосів: ${votesData[teamType] || 0}`
         })
+      } else {
+        buttonsWrappers.forEach(wrapper => {
+          wrapper.classList.remove('disabledButtonWrapper')
+        })
+        buttons.forEach(button => {
+          const teamType = button.dataset.team
+          button.addEventListener('click', () => {
+            onButtonClick(teamType)
+          })
+        })
       }
 
-    } 
+    } else {
+      buttonsWrappers.forEach(wrapper => {
+        wrapper.classList.remove('disabledButtonWrapper')
+      })
+      buttons.forEach(button => {
+        const teamType = button.dataset.team
+        button.addEventListener('click', () => {
+          onButtonClick(teamType)
+        })
+      })
+    }
   } catch(err) {
-    console.error(error);
+    console.log(err);
   }
 }
 
@@ -90,19 +107,7 @@ const onButtonClick = async (teamType) => {
 }
 
 window.addEventListener('load', () => {
-  if (isVoted) {
-    getActualVotes()
-    buttonsWrappers.forEach(wrapper => {
-      wrapper.classList.add('disabledButtonWrapper')
-    })
-  } else {
-    buttons.forEach(button => {
-      const teamType = button.dataset.team
-      button.addEventListener('click', () => {
-        onButtonClick(teamType)
-      })
-    })
-  }
+   getActualVotes()
 })
 
 function getCookie(name) {
