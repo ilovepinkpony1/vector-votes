@@ -16,10 +16,8 @@ const db = getDatabase(app);
 
 
 
-const buttons = document.querySelectorAll('.buttonWrapper button')
-const buttonsWrappers = document.querySelectorAll('.buttonWrapper')
-const countWrapper = document.querySelector('.votesCountWrapper')
-const votesCountWrapper = document.querySelector('.votesCount')
+const buttons = document.querySelectorAll('.vectorButtonWrapper button')
+const buttonsWrappers = document.querySelectorAll('.vectorButtonWrapper')
 const isVoted = getCookie('user-vector-voted')
 const votesData = {}
 
@@ -37,10 +35,14 @@ const getActualVotes = async () => {
         }
       })
 
-      votesCountWrapper.innerHTML = allVotesCount
-
       if (isVoted) {
-        countWrapper.classList.add('votesCountWrapperVisible')
+        buttonsWrappers.forEach(wrapper => {
+          wrapper.classList.add('disabledButtonWrapper')
+        })
+        buttons.forEach(button => {
+          const teamType = button.dataset.team
+          button.innerHTML = `всого голосів: ${votesData[teamType] || 0}`
+        })
       }
 
     } 
@@ -69,18 +71,21 @@ const onButtonClick = async (teamType) => {
     });
 
     
-    votesCountWrapper.innerHTML = (parseInt(votesCountWrapper.innerText) || 0) + 1
 
     setCookie('user-vector-voted', true, {
       expires: date
     })
 
-    countWrapper.classList.add('votesCountWrapperVisible')
     buttonsWrappers.forEach(wrapper => {
       wrapper.classList.add('disabledButtonWrapper')
     })
+
+    buttons.forEach(button => {
+      const teamType = button.dataset.team
+      button.innerHTML = `${votesData[teamType] || 0} голосів`
+    })
   } catch (e) {
-    console.error("Error adding document: ", e);
+    console.log(e)
   }
 }
 
