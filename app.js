@@ -20,11 +20,10 @@ const buttons = document.querySelectorAll('.vectorButtonWrapper button')
 const buttonsWrappers = document.querySelectorAll('.vectorButtonWrapper')
 const votesData = {}
 
-const getActualVotes = async () => {
+const getActualVotes = async (fromButton) => {
   try {
     const snapshot = await get(ref(db, 'votes'))
     if (snapshot.exists()) {
-      let allVotesCount = 0
 
       Object.entries(snapshot.val()).forEach(([snapKey, snapValue]) => {
         if (snapKey && snapValue && snapValue.votes) {
@@ -33,26 +32,28 @@ const getActualVotes = async () => {
         }
       })
 
-      const isVoted = getCookie('user-vector-voted')
+      if (!fromButton) {
+        const isVoted = getCookie('user-vector-voted')
 
-      if (isVoted) {
-        buttons.forEach(button => {
-          const teamType = button.dataset.team
-          button.innerHTML = `Голосів: ${votesData[teamType] || 0}`
-        })
-      } else {
-        buttonsWrappers.forEach(wrapper => {
-          wrapper.classList.remove('disabledButtonWrapper')
-        })
-        buttons.forEach(button => {
-          const teamType = button.dataset.team
-          button.addEventListener('click', () => {
-            onButtonClick(teamType)
+        if (isVoted) {
+          buttons.forEach(button => {
+            const teamType = button.dataset.team
+            button.innerHTML = `Голосів: ${votesData[teamType] || 0}`
           })
-        })
+        } else {
+          buttonsWrappers.forEach(wrapper => {
+            wrapper.classList.remove('disabledButtonWrapper')
+          })
+          buttons.forEach(button => {
+            const teamType = button.dataset.team
+            button.addEventListener('click', () => {
+              onButtonClick(teamType)
+            })
+          })
+        }
       }
 
-    } else {
+    } else if (!fromButton) {
       buttonsWrappers.forEach(wrapper => {
         wrapper.classList.remove('disabledButtonWrapper')
       })
@@ -63,7 +64,7 @@ const getActualVotes = async () => {
         })
       })
     }
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
 }
@@ -74,7 +75,7 @@ const onButtonClick = async (teamType) => {
 
   try {
 
-    await getActualVotes()
+    await getActualVotes(true)
 
     let votes = 1
     if (votesData[teamType]) {
@@ -87,7 +88,7 @@ const onButtonClick = async (teamType) => {
       votes,
     });
 
-    
+
 
     setCookie('user-vector-voted', true, {
       expires: date
@@ -107,7 +108,7 @@ const onButtonClick = async (teamType) => {
 }
 
 window.addEventListener('load', () => {
-   getActualVotes()
+  getActualVotes(false)
 })
 
 function getCookie(name) {
