@@ -25,45 +25,20 @@
     try {
       const snapshot = await get(ref(db, 'votes'))
       if (snapshot.exists()) {
-
         Object.entries(snapshot.val()).forEach(([snapKey, snapValue]) => {
           if (snapKey && snapValue && snapValue.votes) {
             votesData[snapKey] = snapValue.votes
-            allVotesCount += snapValue.votes
           }
         })
 
-        if (!fromButton) {
-          const isVoted = getCookie('user-vector-voted')
+        const isVoted = getCookie('user-vector-voted')
 
-          if (isVoted) {
-            buttons.forEach(button => {
-              const teamType = button.dataset.team
-              button.innerHTML = `Голосів: ${votesData[teamType] || 0}`
-            })
-          } else {
-            buttonsWrappers.forEach(wrapper => {
-              wrapper.classList.remove('disabledButtonWrapper')
-            })
-            buttons.forEach(button => {
-              const teamType = button.dataset.team
-              button.addEventListener('click', () => {
-                onButtonClick(teamType)
-              })
-            })
-          }
-        }
-
-      } else if (!fromButton) {
-        buttonsWrappers.forEach(wrapper => {
-          wrapper.classList.remove('disabledButtonWrapper')
-        })
-        buttons.forEach(button => {
-          const teamType = button.dataset.team
-          button.addEventListener('click', () => {
-            onButtonClick(teamType)
+        if (!fromButton && isVoted) {
+          buttons.forEach(button => {
+            const teamType = button.dataset.team
+            button.innerHTML = `Голосів: ${votesData[teamType] || 0}`
           })
-        })
+        }
       }
     } catch (err) {
       console.log(err);
@@ -109,6 +84,20 @@
   }
 
   window.addEventListener('load', () => {
+    const isVoted = getCookie('user-vector-voted')
+
+    if (!isVoted) {
+      buttonsWrappers.forEach(wrapper => {
+        wrapper.classList.remove('disabledButtonWrapper')
+      })
+      buttons.forEach(button => {
+        const teamType = button.dataset.team
+        button.addEventListener('click', () => {
+          onButtonClick(teamType)
+        })
+      })
+    }
+
     getActualVotes(false)
   })
 
