@@ -49,34 +49,28 @@
     date.setDate(date.getDate() + 100);
 
     try {
-
       await getActualVotes(true)
 
-      let votes = 1
       if (votesData[teamType]) {
-        votes += votesData[teamType]
+        votesData[teamType] = votesData[teamType] + 1
+
+        set(ref(db, 'votes/' + teamType), {
+          votes: votesData[teamType],
+        });
+
+        setCookie('user-vector-voted', true, {
+          expires: date
+        })
+
+        buttonsWrappers.forEach(wrapper => {
+          wrapper.classList.add('disabledButtonWrapper')
+        })
+
+        buttons.forEach(button => {
+          const teamTypeSet = button.dataset.team
+          button.innerHTML = `Голосів: ${votesData[teamTypeSet] || 0}`
+        })
       }
-
-      votesData[teamType] = votes
-
-      set(ref(db, 'votes/' + teamType), {
-        votes,
-      });
-
-
-
-      setCookie('user-vector-voted', true, {
-        expires: date
-      })
-
-      buttonsWrappers.forEach(wrapper => {
-        wrapper.classList.add('disabledButtonWrapper')
-      })
-
-      buttons.forEach(button => {
-        const teamType = button.dataset.team
-        button.innerHTML = `Голосів: ${votesData[teamType] || 0}`
-      })
     } catch (e) {
       console.log(e)
     }
